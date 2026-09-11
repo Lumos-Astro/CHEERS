@@ -231,7 +231,17 @@ section#next{margin-top:28px;}
   color:var(--ink-dim);
 }
 .snack-note strong{color:var(--ink);font-weight:600;}
-.cta-row{margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;}
+.cta-row{margin-top:20px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;}
+.btn-sm{
+  padding:7px 12px;
+  font-size:13px;
+  border-radius:8px;
+}
+.calendar-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
 .btn{
   font-family:'Inter',sans-serif;
   font-weight:600;
@@ -421,8 +431,11 @@ footer{
         <div id="themeWrap"></div>
         <div class="snack-note" id="nextNote"></div>
         <div class="cta-row">
-          <button class="btn btn-primary" id="icsBtn">Add to calendar</button>
-          <a class="btn btn-ghost" href="#dropbox">Suggest something for this one</a>
+          <div class="calendar-row">
+            <button class="btn btn-primary btn-sm" id="googleCalBtn">+ Google Calendar</button>
+            <button class="btn btn-primary btn-sm" id="icsBtn">+ Apple / Outlook</button>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="#dropbox">Suggest something for this one</a>
         </div>
       </div>
     </div>
@@ -609,6 +622,27 @@ async function submitIdea(){
   }
 }
 document.getElementById('sendBtn').addEventListener('click', submitIdea);
+function googleCalDate(dateObj, hhmm){
+  const [h,m] = hhmm.split(':').map(Number);
+  const y = dateObj.getFullYear(), mo = pad(dateObj.getMonth()+1), da = pad(dateObj.getDate());
+  return y + mo + da + 'T' + pad(h) + pad(m) + '00';
+}
+function openGoogleCalendar(){
+  const n = CONFIG.next;
+  const d = parseLocalDate(n.date);
+  const start = googleCalDate(d, n.time);
+  const end = googleCalDate(d, n.endTime || n.time);
+  const title = 'Cheers' + (n.theme ? ' — ' + n.theme : '');
+  const details = (n.theme ? ('Theme: ' + n.theme + '. ') : '') + n.note;
+  const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    + '&text=' + encodeURIComponent(title)
+    + '&dates=' + start + '/' + end
+    + '&details=' + encodeURIComponent(details)
+    + '&location=' + encodeURIComponent(n.place)
+    + '&ctz=Europe/Lisbon';
+  window.open(url, '_blank');
+}
+document.getElementById('googleCalBtn').addEventListener('click', openGoogleCalendar);
 document.getElementById('icsBtn').addEventListener('click', downloadIcs);
 
 /* ---------- Starfield ---------- */
